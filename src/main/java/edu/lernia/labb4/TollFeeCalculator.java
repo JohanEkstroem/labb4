@@ -13,7 +13,7 @@ public class TollFeeCalculator {
         try {
             Scanner sc = new Scanner(new File(inputFile));
             String[] dateStrings = sc.nextLine().split(", ");
-            LocalDateTime[] dates = new LocalDateTime[dateStrings.length]; // Bug1
+            LocalDateTime[] dates = new LocalDateTime[dateStrings.length];
             for(int i = 0; i < dates.length; i++) {
                 dates[i] = LocalDateTime.parse(dateStrings[i], DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
             }
@@ -26,30 +26,19 @@ public class TollFeeCalculator {
     public static int getTotalFeeCost(LocalDateTime[] dates) {
         int totalFee = 0;
         LocalDateTime intervalStart = dates[0];
-      /*   for(LocalDateTime date: dates) {
-            //System.out.println(date.toString());
+         for(LocalDateTime date: dates) {
+            System.out.println(date.toString());
             long diffInMinutes = intervalStart.until(date, ChronoUnit.MINUTES);
             if(diffInMinutes > 60) {
                 totalFee += getTollFeePerPassing(date);
                 intervalStart = date;
             } else {
-                totalFee += Math.max(getTollFeePerPassing(date), getTollFeePerPassing(intervalStart));
+             if(totalFee < Math.max(getTollFeePerPassing(date), getTollFeePerPassing(intervalStart))){
+                totalFee = Math.max(getTollFeePerPassing(date), getTollFeePerPassing(intervalStart));
             }
-        } */
-        for(int i = 0; i<dates.length; i++){
-            long diffInMinutes = intervalStart.until(dates[i], ChronoUnit.MINUTES);
-            if(diffInMinutes > 60) {
-                totalFee += getTollFeePerPassing(dates[i]);
-                intervalStart = dates[i];
-            } else {
-                if(totalFee < Math.max(getTollFeePerPassing(dates[i]), getTollFeePerPassing(intervalStart))){
-                    totalFee += Math.max(getTollFeePerPassing(dates[i]), getTollFeePerPassing(intervalStart));
-                }
-            }
-            System.out.println(totalFee + " " + dates[i]);
+        } 
         }
-        System.out.println(totalFee + "totalFee per run" );
-        return Math.min(totalFee, 60); // Bug. Should return actual cost OR 60 if cost > 60
+        return Math.min(totalFee, 60);
     }
 
     public static int getTollFeePerPassing(LocalDateTime date) {
@@ -60,8 +49,7 @@ public class TollFeeCalculator {
         else if (hour == 6 && minute >= 30 && minute <= 59) return 13;
         else if (hour == 7 && minute >= 0 && minute <= 59) return 18;
         else if (hour == 8 && minute >= 0 && minute <= 29) return 13;
-       // else if (hour >= 8 && hour <= 14 && minute >= 30 && minute <= 59) return 8; //Bug, cannot handle below 30 min
-        else if (hour == 8 && minute >= 30 || hour <= 14 && minute <= 59) return 8; //Bug, cannot handle below 30 min
+        else if (hour == 8 && minute >= 30 || hour > 8 && hour <= 14 && minute <= 59) return 8;
         else if (hour == 15 && minute >= 0 && minute <= 29) return 13;
         else if (hour == 15 && minute >= 30 || hour == 16 && minute <= 59) return 18;
         else if (hour == 17 && minute >= 0 && minute <= 59) return 13;
@@ -70,7 +58,10 @@ public class TollFeeCalculator {
     }
 
     public static boolean isTollFreeDate(LocalDateTime date) {
-        return date.getDayOfWeek().getValue() == 6 || date.getDayOfWeek().getValue() == 7 || date.getMonth().getValue() == 7;
+        int day = date.getDayOfWeek().getValue();
+        int month = date.getMonthValue();
+
+        return day == 6 || day == 7 || month  == 7;
     }
 
     public static void main(String[] args) {
